@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        button {
+            padding: 1rem;
+            margin: 0.5rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center; padding: 2rem;">
+        <button id="startBtn">Start Recording</button>
+        <button id="stopBtn" disabled>Stop Recording</button>
+        <div id="timer"></div>
+        <audio id="player" controls style="display: none; margin-top: 1rem;"></audio>
+    </div>
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let startTime;
+        let timerInterval;
+
+        document.getElementById('startBtn').onclick = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audio = document.getElementById('player');
+                    audio.src = audioUrl;
+                    audio.style.display = 'block';
+                };
+
+                audioChunks = [];
+                mediaRecorder.start();
+                startTime = Date.now();
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                
+                timerInterval = setInterval(() => {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    document.getElementById('timer').textContent = `${elapsed}s / 90s`;
+                }, 1000);
+
+                // Auto-stop after 90 seconds
+                setTimeout(() => {
+                    if (mediaRecorder.state === 'recording') {
+                        stopRecording();
+                    }
+                }, 90000);
+            } catch (err) {
+                console.error('Error:', err);
+                alert('Error accessing microphone: ' + err.message);
+            }
+        };
+
+        document.getElementById('stopBtn').onclick = stopRecording;
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            clearInterval(timerInterval);
+        }
+    </script>
+</body>
+</html>

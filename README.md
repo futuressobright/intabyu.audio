@@ -1,8 +1,50 @@
-# React + Vite
+# intabyu.audio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A Progressive Web Application for practicing interview questions through audio recording and feedback.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Record and playback audio responses to interview questions
+- Organize questions by categories
+- Text-to-speech question reading
+- Speech-to-text transcription of answers
+- Offline support
+- Local storage of questions and recordings
+
+## Setup
+
+1. Clone the repository:
+```bash
+git clone https://github.com/futuressobright/intabyu.audio.git
+cd intabyu.audio
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm run dev
+```
+
+## Project Structure
+
+```
+intabyu.audio/
+├── src/
+│   ├── components/    # Reusable UI components
+│   ├── services/      # Core functionality
+│   ├── utils/         # Helper functions
+│   ├── App.js
+│   └── index.js
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](./docs/CONTRIBUTING.md) for development guidelines.
+
+## Architecture
+
+See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for technical details about the project structure and design decisions.
