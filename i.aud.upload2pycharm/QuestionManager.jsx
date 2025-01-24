@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import dbService from '../services/dbService';
-import AudioRecorder from './AudioRecorder';
+import AudioRecorder from './AudioRecorder/AudioRecorder';
 
 const CategoryTile = ({ category, onAddQuestion }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -118,21 +118,6 @@ const QuestionManager = () => {
     }
   };
 
-  const addQuestion = (categoryId, questionText) => {
-    setCategories(categories.map(category => {
-      if (category.id === categoryId) {
-        return {
-          ...category,
-          questions: [...category.questions, {
-            id: Date.now(),
-            text: questionText,
-            recordings: []
-          }]
-        };
-      }
-      return category;
-    }));
-  };
 
   return (
     <div className="max-w-3xl mx-auto">

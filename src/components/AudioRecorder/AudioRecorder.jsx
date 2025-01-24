@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AudioRecorderService } from '../services/audioRecorder.js';
-import dbService from '../services/dbService';
+import { AudioRecorderService } from '../../services/audioRecorder';
+import dbService from '../../services/dbService';
 
 const AudioRecorder = ({ questionId }) => {
   const [isRecording, setIsRecording] = useState(false);

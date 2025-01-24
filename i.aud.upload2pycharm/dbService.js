@@ -22,7 +22,7 @@ class DBService {
         const db = event.target.result;
 
         if (!db.objectStoreNames.contains('categories')) {
-          db.createObjectStore('categories', { keyPath: 'id', autoIncrement: true });
+          db.createObjectStore('categories', {keyPath: 'id', autoIncrement: true});
         }
 
         if (!db.objectStoreNames.contains('recordings')) {
@@ -30,7 +30,7 @@ class DBService {
             keyPath: 'id',
             autoIncrement: true
           });
-          recordingsStore.createIndex('questionId', 'questionId', { unique: false });
+          recordingsStore.createIndex('questionId', 'questionId', {unique: false});
         }
       };
     });
@@ -57,6 +57,42 @@ class DBService {
       const request = index.getAll(questionId);
 
       request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async getCategories() {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('categories', 'readonly');
+      const store = tx.objectStore('categories');
+      const request = store.getAll();
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+
+  async saveCategories(categories) {
+    const db = await this.init();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('categories', 'readwrite');
+      const store = tx.objectStore('categories');
+      const request = store.clear();
+
+      request.onsuccess = () => {
+        Promise.all(categories.map(category => {
+          return new Promise((res, rej) => {
+            const req = store.add(category);
+            req.onsuccess = () => res();
+            req.onerror = () => rej(req.error);
+          });
+        }))
+            .then(() => resolve())
+            .catch(error => reject(error));
+      };
+
       request.onerror = () => reject(request.error);
     });
   }
