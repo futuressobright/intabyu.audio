@@ -4,31 +4,25 @@ import dbService from '../services/dbService';
 
 const AudioRecorder = ({ questionId }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [recorder, setRecorder] = useState(null);
+  const [recorderService, setRecorderService] = useState(null);
   const [recordings, setRecordings] = useState([]);
 
   useEffect(() => {
-    const initRecorder = async () => {
-      const recorderService = new AudioRecorderService();
-      await recorderService.initialize();
-      setRecorder(recorderService);
-    };
-
-    const loadRecordings = async () => {
-      if (questionId) {
-        const savedRecordings = await dbService.getRecordingsByQuestionId(questionId);
-        console.log('Loaded recordings:', savedRecordings);
-        setRecordings(savedRecordings);
-      }
-    };
-
-    initRecorder();
     loadRecordings();
   }, [questionId]);
 
+  const loadRecordings = async () => {
+    if (questionId) {
+      const savedRecordings = await dbService.getRecordingsByQuestionId(questionId);
+      setRecordings(savedRecordings);
+    }
+  };
+
   const startRecording = async () => {
-    if (!recorder) return;
     try {
+      const recorder = new AudioRecorderService();
+      await recorder.initialize();
+      setRecorderService(recorder);
       await recorder.start();
       setIsRecording(true);
     } catch (error) {
@@ -37,9 +31,9 @@ const AudioRecorder = ({ questionId }) => {
   };
 
   const stopRecording = async () => {
-    if (!recorder) return;
+    if (!recorderService) return;
     try {
-      const audioUrl = await recorder.stop();
+      const audioUrl = await recorderService.stop();
       setIsRecording(false);
 
       const newRecording = {
@@ -51,10 +45,10 @@ const AudioRecorder = ({ questionId }) => {
 
       await dbService.saveRecording(newRecording);
       setRecordings(prev => [...prev, newRecording]);
-      console.log('New recording saved:', newRecording);
     } catch (error) {
       console.error('Error stopping recording:', error);
     }
+    setRecorderService(null);
   };
 
   return (
@@ -63,8 +57,7 @@ const AudioRecorder = ({ questionId }) => {
         {!isRecording ? (
           <button
             onClick={startRecording}
-            disabled={!recorder}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
             Record Answer
           </button>
@@ -80,7 +73,7 @@ const AudioRecorder = ({ questionId }) => {
 
       {recordings.length > 0 && (
         <div className="space-y-2">
-          {recordings.map((recording) => (
+          {recordings.slice().reverse().map((recording) => (
             <div key={recording.id} className="flex items-center gap-2 p-2 bg-white rounded shadow">
               <audio src={recording.audioUrl} controls className="w-full" />
               <span className="text-sm text-gray-500">

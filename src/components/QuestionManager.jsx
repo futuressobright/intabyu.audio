@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import dbService from '../services/dbService';
 import AudioRecorder from './AudioRecorder';
 
-const CategoryTile = ({ category, onAddQuestion, onSelectQuestion, selectedQuestionId }) => {
+const CategoryTile = ({ category, onAddQuestion }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [newQuestion, setNewQuestion] = useState('');
 
@@ -12,8 +12,14 @@ const CategoryTile = ({ category, onAddQuestion, onSelectQuestion, selectedQuest
     setNewQuestion('');
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleAddQuestion();
+    }
+  };
+
   return (
-    <div className="border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+    <div className="border rounded-lg shadow-sm hover:shadow-md transition-shadow mb-4">
       <div
         onClick={() => setIsExpanded(!isExpanded)}
         className="p-4 cursor-pointer bg-white rounded-t-lg flex justify-between items-center"
@@ -29,6 +35,7 @@ const CategoryTile = ({ category, onAddQuestion, onSelectQuestion, selectedQuest
               type="text"
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
+              onKeyPress={handleKeyPress}
               placeholder="New Question"
               className="flex-1 p-2 border rounded bg-white"
             />
@@ -40,23 +47,38 @@ const CategoryTile = ({ category, onAddQuestion, onSelectQuestion, selectedQuest
             </button>
           </div>
 
-          <ul className="space-y-2">
+          <div className="space-y-2">
             {category.questions.map(question => (
-              <li
+              <QuestionItem
                 key={question.id}
-                onClick={() => onSelectQuestion(question.id)}
-                className={`p-3 rounded cursor-pointer ${
-                  selectedQuestionId === question.id 
-                    ? 'bg-blue-100 border border-blue-300' 
-                    : 'bg-white hover:bg-gray-100'
-                }`}
-              >
-                {question.text}
-              </li>
+                question={question}
+              />
             ))}
-          </ul>
+          </div>
         </div>
       )}
+    </div>
+  );
+};
+
+const QuestionItem = ({ question }) => {
+  const [showRecorder, setShowRecorder] = useState(false);
+
+  return (
+    <div className="mb-4">
+      <div
+        onClick={() => setShowRecorder(!showRecorder)}
+        className="p-3 rounded cursor-pointer bg-white hover:bg-gray-100"
+      >
+        <div className="flex justify-between items-center">
+          <span>{question.text}</span>
+          <span className="text-gray-500">{showRecorder ? '▼' : '▶'}</span>
+        </div>
+      </div>
+
+      <div className={`mt-2 pl-4 border-l-2 border-blue-200 ${showRecorder ? '' : 'hidden'}`}>
+        <AudioRecorder questionId={question.id} />
+      </div>
     </div>
   );
 };
@@ -64,7 +86,6 @@ const CategoryTile = ({ category, onAddQuestion, onSelectQuestion, selectedQuest
 const QuestionManager = () => {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
-  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -91,6 +112,12 @@ const QuestionManager = () => {
     setNewCategory('');
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      addCategory();
+    }
+  };
+
   const addQuestion = (categoryId, questionText) => {
     setCategories(categories.map(category => {
       if (category.id === categoryId) {
@@ -107,55 +134,35 @@ const QuestionManager = () => {
     }));
   };
 
-  const handleQuestionSelect = (questionId) => {
-    setSelectedQuestionId(questionId);
-  };
-
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <div className="mb-6">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="New Category"
-                className="flex-1 p-2 border rounded"
-              />
-              <button
-                onClick={addCategory}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-
-          <div className="grid gap-4">
-            {categories.map(category => (
-              <CategoryTile
-                key={category.id}
-                category={category}
-                onAddQuestion={addQuestion}
-                onSelectQuestion={handleQuestionSelect}
-                selectedQuestionId={selectedQuestionId}
-              />
-            ))}
-          </div>
+    <div className="max-w-3xl mx-auto">
+      <div className="mb-6">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="New Category"
+            className="flex-1 p-2 border rounded"
+          />
+          <button
+            onClick={addCategory}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Add
+          </button>
         </div>
+      </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-xl font-semibold mb-4">Recording Section</h2>
-          {selectedQuestionId ? (
-            <AudioRecorder questionId={selectedQuestionId} />
-          ) : (
-            <div className="text-gray-500 text-center py-8">
-              Select a question to start recording
-            </div>
-          )}
-        </div>
+      <div>
+        {categories.map(category => (
+          <CategoryTile
+            key={category.id}
+            category={category}
+            onAddQuestion={addQuestion}
+          />
+        ))}
       </div>
     </div>
   );

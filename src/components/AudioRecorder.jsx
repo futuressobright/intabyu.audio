@@ -1,117 +1,88 @@
-// src/components/AudioRecorder.jsx
 import React, { useState, useEffect } from 'react';
-import { AudioRecorderService } from '../services/audioRecorder';
+import { AudioRecorderService } from '../services/audioRecorder.js';
 import dbService from '../services/dbService';
 
 const AudioRecorder = ({ questionId }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [recorder, setRecorder] = useState(null);
-  const [audioUrl, setAudioUrl] = useState(null);
+  const [recorderService, setRecorderService] = useState(null);
   const [recordings, setRecordings] = useState([]);
 
   useEffect(() => {
-    const initRecorder = async () => {
-      const recorderService = new AudioRecorderService();
-      await recorderService.initialize();
-      setRecorder(recorderService);
-    };
-
-    const loadRecordings = async () => {
-      if (questionId) {
-        const savedRecordings = await dbService.getRecordingsByQuestionId(questionId);
-        setRecordings(savedRecordings);
-      }
-    };
-
-    initRecorder().catch(console.error);
-    loadRecordings().catch(console.error);
+    loadRecordings();
   }, [questionId]);
+
+  const loadRecordings = async () => {
+    if (questionId) {
+      const savedRecordings = await dbService.getRecordingsByQuestionId(questionId);
+      setRecordings(savedRecordings);
+    }
+  };
 
   const startRecording = async () => {
     try {
+      const recorder = new AudioRecorderService();
+      await recorder.initialize();
+      setRecorderService(recorder);
+      await recorder.start();
       setIsRecording(true);
-      recorder.start();
     } catch (error) {
       console.error('Error starting recording:', error);
-      setIsRecording(false);
     }
   };
 
   const stopRecording = async () => {
+    if (!recorderService) return;
     try {
-      const url = await recorder.stop();
-      setAudioUrl(url);
+      const audioUrl = await recorderService.stop();
       setIsRecording(false);
 
-      // Save the recording if we have a questionId
-      if (questionId) {
-        const recording = {
-          id: Date.now(),
-          questionId,
-          audioUrl: url,
-          timestamp: new Date().toISOString()
-        };
+      const newRecording = {
+        id: Date.now(),
+        questionId,
+        audioUrl,
+        timestamp: new Date().toISOString()
+      };
 
-        await dbService.saveRecording(recording);
-        setRecordings([...recordings, recording]);
-      }
+      await dbService.saveRecording(newRecording);
+      setRecordings(prev => [...prev, newRecording]);
     } catch (error) {
       console.error('Error stopping recording:', error);
     }
+    setRecorderService(null);
   };
 
   return (
-    <div className="p-4">
-      <div className="flex flex-col items-center gap-4">
-        <div className="flex gap-4">
+    <div className="mt-4 space-y-4">
+      <div className="flex gap-2">
+        {!isRecording ? (
           <button
             onClick={startRecording}
-            disabled={isRecording || !recorder}
-            className={`px-4 py-2 rounded ${
-              isRecording || !recorder
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-blue-500 hover:bg-blue-600'
-            } text-white`}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            Start Recording
+            Record Answer
           </button>
+        ) : (
           <button
             onClick={stopRecording}
-            disabled={!isRecording}
-            className={`px-4 py-2 rounded ${
-              !isRecording 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-red-500 hover:bg-red-600'
-            } text-white`}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
           >
             Stop Recording
           </button>
-        </div>
-
-        {isRecording && (
-          <div>Recording in progress...</div>
-        )}
-
-        {audioUrl && (
-          <audio src={audioUrl} controls className="mt-4" />
-        )}
-
-        {recordings.length > 0 && (
-          <div className="mt-4 w-full">
-            <h3 className="text-lg font-semibold mb-2">Previous Recordings</h3>
-            <div className="space-y-2">
-              {recordings.map(recording => (
-                <div key={recording.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                  <audio src={recording.audioUrl} controls className="flex-1" />
-                  <span className="text-sm text-gray-500">
-                    {new Date(recording.timestamp).toLocaleString()}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
       </div>
+
+      {recordings.length > 0 && (
+        <div className="space-y-2">
+          {recordings.slice().reverse().map((recording) => (
+            <div key={recording.id} className="flex items-center gap-2 p-2 bg-white rounded shadow">
+              <audio src={recording.audioUrl} controls className="w-full" />
+              <span className="text-sm text-gray-500">
+                {new Date(recording.timestamp).toLocaleString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
