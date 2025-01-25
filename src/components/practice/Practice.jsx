@@ -7,7 +7,7 @@ const AchievementBanner = () => (
   <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl p-6 mb-8">
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
-        <div className="bg-white rounded-2xl p-3">
+        <div className="bg-orange-50 rounded-2xl p-3">
           <Trophy className="w-8 h-8 text-purple-500" />
         </div>
         <div>
@@ -21,17 +21,17 @@ const AchievementBanner = () => (
 
 const StatsRow = () => (
   <div className="grid grid-cols-3 gap-4 mb-8">
-    <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
+    <div className="bg-orange-50 rounded-2xl p-4 text-center shadow-sm">
       <Flame className="w-6 h-6 mx-auto mb-2 text-orange-400" />
       <div className="text-2xl font-bold">12</div>
       <div className="text-xs text-gray-600">Day Streak</div>
     </div>
-    <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
+    <div className="bg-orange-50 rounded-2xl p-4 text-center shadow-sm">
       <Star className="w-6 h-6 mx-auto mb-2 text-yellow-400" />
       <div className="text-2xl font-bold">85%</div>
       <div className="text-xs text-gray-600">Accuracy</div>
     </div>
-    <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
+    <div className="bg-orange-50 rounded-2xl p-4 text-center shadow-sm">
       <Sparkles className="w-6 h-6 mx-auto mb-2 text-purple-400" />
       <div className="text-2xl font-bold">24</div>
       <div className="text-xs text-gray-600">Answers</div>
@@ -40,7 +40,7 @@ const StatsRow = () => (
 );
 
 const CategoryList = ({ categories, activeCategory, onCategorySelect, onAddCategory }) => (
-  <div className="w-1/4 min-w-[250px] bg-gray-50 overflow-y-auto p-4 border-r">
+  <div className="w-1/4 min-w-[250px] bg-orange-50 overflow-y-auto p-4 border-r">
     <button
       onClick={onAddCategory}
       className="w-full mb-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
@@ -56,7 +56,7 @@ const CategoryList = ({ categories, activeCategory, onCategorySelect, onAddCateg
           className={`p-3 rounded-lg cursor-pointer transition-colors ${
             activeCategory?.id === category.id 
               ? 'bg-blue-100 text-blue-700' 
-              : 'hover:bg-gray-100'
+              : 'hover:bg-orange-100'
           }`}
         >
           <h3 className="font-medium">{category.name}</h3>
@@ -68,7 +68,7 @@ const CategoryList = ({ categories, activeCategory, onCategorySelect, onAddCateg
 );
 
 const QuestionPanel = ({ category, onAddQuestion, activeQuestionId, onQuestionToggle }) => (
-  <div className="flex-1 overflow-y-auto p-4">
+  <div className="flex-1 overflow-y-auto p-4 bg-orange-50">
     {category ? (
       <>
         <div className="flex justify-between items-center mb-6">
@@ -86,10 +86,10 @@ const QuestionPanel = ({ category, onAddQuestion, activeQuestionId, onQuestionTo
 
         <div className="space-y-3">
           {category.questions?.map(q => (
-            <div key={q.id} className="border rounded-lg overflow-hidden bg-white">
+            <div key={q.id} className="border rounded-lg overflow-hidden bg-orange-50">
               <div
                 onClick={() => onQuestionToggle(q.id)}
-                className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                className="p-4 cursor-pointer hover:bg-orange-100 transition-colors"
               >
                 {q.text}
               </div>
@@ -97,7 +97,7 @@ const QuestionPanel = ({ category, onAddQuestion, activeQuestionId, onQuestionTo
               <div className={`transition-all duration-300 ease-in-out ${
                 activeQuestionId === q.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
               }`}>
-                <div className="p-4 bg-gray-50 border-t">
+                <div className="p-4 bg-orange-100 border-t">
                   <AudioRecorder questionId={q.id} />
                 </div>
               </div>
@@ -155,8 +155,8 @@ const Practice = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="px-6 py-4 bg-white shadow-sm">
+    <div className="min-h-screen bg-orange-100">
+      <div className="px-6 py-4 bg-orange-100 shadow-sm">
         <AchievementBanner />
         <StatsRow />
       </div>

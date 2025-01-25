@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+i.aud.upload2pycharm
 i.aud.upload2pycharm/*
 
 # Editor directories and files
