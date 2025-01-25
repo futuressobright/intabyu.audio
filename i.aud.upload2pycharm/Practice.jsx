@@ -7,7 +7,7 @@ const AchievementBanner = () => (
   <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl p-6 mb-8">
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
-        <div className="bg-orange-50 rounded-2xl p-3">
+        <div className="bg-white rounded-3xl p-3">  {/* Changed from rounded-2xl */}
           <Trophy className="w-8 h-8 text-purple-500" />
         </div>
         <div>
@@ -162,8 +162,8 @@ const Practice = () => {
   };
 
   return (
-    <div className="min-h-screen bg-orange-100">
-      <div className="px-6 py-4 bg-orange-100 shadow-sm">
+    <div className="bg-orange-100">  {/* Remove min-h-screen */}
+      <div className="px-6 py-4">    {/* Remove bg-orange-100 and shadow */}
         <AchievementBanner />
         <StatsRow />
       </div>
