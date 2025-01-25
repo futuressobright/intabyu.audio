@@ -126,6 +126,13 @@ const Practice = () => {
     loadCategories();
   }, []);
 
+    useEffect(() => {
+      if (activeCategory) {
+        const updatedCategory = categories.find(c => c.id === activeCategory.id);
+        setActiveCategory(updatedCategory);
+      }
+    }, [categories]);
+
   const addCategory = async () => {
     const name = prompt("Enter category name:");
     if (!name?.trim()) return;
