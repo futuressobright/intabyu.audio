@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 
+i.aud.upload2pycharm/*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

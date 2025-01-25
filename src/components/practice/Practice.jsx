@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Flame, Star, Sparkles } from 'lucide-react';
+import AudioRecorder from '../AudioRecorder/AudioRecorder';
 import dbService from '../../services/dbService';
-import CategoryCard from '../CategoryCard/CategoryCard.jsx';
-import CategoryList from '../CategoryList/CategoryList';
 
 const AchievementBanner = () => (
   <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl p-6 mb-8">
@@ -20,16 +19,6 @@ const AchievementBanner = () => (
   </div>
 );
 
-// In Practice.jsx, update the test data
-const testCategories = [
-  {
-    id: 1,
-    name: 'Behavioral',
-    questions: [
-      { id: 1, text: 'Tell me about yourself' }
-    ]
-  }
-];
 const StatsRow = () => (
   <div className="grid grid-cols-3 gap-4 mb-8">
     <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
@@ -50,34 +39,113 @@ const StatsRow = () => (
   </div>
 );
 
+const CategoryList = ({ categories, activeCategory, onCategorySelect, onAddCategory }) => (
+  <div className="w-1/4 min-w-[250px] bg-gray-50 overflow-y-auto p-4 border-r">
+    <button
+      onClick={onAddCategory}
+      className="w-full mb-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+    >
+      Add Category
+    </button>
+
+    <div className="space-y-1">
+      {categories.map(category => (
+        <div
+          key={category.id}
+          onClick={() => onCategorySelect(category)}
+          className={`p-3 rounded-lg cursor-pointer transition-colors ${
+            activeCategory?.id === category.id 
+              ? 'bg-blue-100 text-blue-700' 
+              : 'hover:bg-gray-100'
+          }`}
+        >
+          <h3 className="font-medium">{category.name}</h3>
+          <p className="text-sm text-gray-600">{category.questions?.length || 0} questions</p>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const QuestionPanel = ({ category, onAddQuestion, activeQuestionId, onQuestionToggle }) => (
+  <div className="flex-1 overflow-y-auto p-4">
+    {category ? (
+      <>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">{category.name}</h2>
+          <button
+            onClick={() => {
+              const text = prompt("Enter your question:");
+              if (text?.trim()) onAddQuestion(category.id, text);
+            }}
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+          >
+            Add Question
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          {category.questions?.map(q => (
+            <div key={q.id} className="border rounded-lg overflow-hidden bg-white">
+              <div
+                onClick={() => onQuestionToggle(q.id)}
+                className="p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+              >
+                {q.text}
+              </div>
+
+              <div className={`transition-all duration-300 ease-in-out ${
+                activeQuestionId === q.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
+              }`}>
+                <div className="p-4 bg-gray-50 border-t">
+                  <AudioRecorder questionId={q.id} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
+    ) : (
+      <div className="h-full flex items-center justify-center text-gray-500">
+        Select a category to view questions
+      </div>
+    )}
+  </div>
+);
+
 const Practice = () => {
-  const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
+  const [activeQuestionId, setActiveQuestionId] = useState(null);
+  const [categories, setCategories] = useState([]);
 
-
-useEffect(() => {
-  const loadCategories = async () => {
-    try {
-      console.log('Fetching categories...');
+  useEffect(() => {
+    const loadCategories = async () => {
       const savedCategories = await dbService.getCategories();
-      console.log('Categories:', savedCategories);
       setCategories(savedCategories || []);
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
+    };
+    loadCategories();
+  }, []);
+
+  const addCategory = async () => {
+    const name = prompt("Enter category name:");
+    if (!name?.trim()) return;
+
+    const newCategory = {
+      id: Date.now(),
+      name,
+      questions: []
+    };
+    setCategories([...categories, newCategory]);
   };
-  loadCategories();
-}, []);
 
-
-  const addQuestion = (categoryId, questionText) => {
+  const addQuestion = (categoryId, text) => {
     setCategories(categories.map(category => {
       if (category.id === categoryId) {
         return {
           ...category,
-          questions: [...category.questions, {
+          questions: [...(category.questions || []), {
             id: Date.now(),
-            text: questionText,
+            text,
             recordings: []
           }]
         };
@@ -86,37 +154,29 @@ useEffect(() => {
     }));
   };
 
-const addCategory = async () => {
-  const name = prompt("Enter category name:");
-  if (!name?.trim()) return;
-
-  const newCategory = {
-    id: Date.now(),
-    name,
-    questions: []
-  };
-  setCategories([...categories, newCategory]);
-};
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto p-6">
+      <div className="px-6 py-4 bg-white shadow-sm">
         <AchievementBanner />
         <StatsRow />
-        <button
-          onClick={addCategory}
-          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
-        >
-          Add Category
-        </button>
+      </div>
+
+      <div className="flex">
         <CategoryList
           categories={categories}
-          onSelectCategory={setActiveCategory}
+          activeCategory={activeCategory}
+          onCategorySelect={setActiveCategory}
+          onAddCategory={addCategory}
+        />
+        <QuestionPanel
+          category={activeCategory}
           onAddQuestion={addQuestion}
-        />      </div>
+          activeQuestionId={activeQuestionId}
+          onQuestionToggle={(qId) => setActiveQuestionId(activeQuestionId === qId ? null : qId)}
+        />
+      </div>
     </div>
   );
 };
-
 
 export default Practice;
