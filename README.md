@@ -1,6 +1,6 @@
 # intabyu.audio
 
-A Progressive Web Application for practicing interview questions through audio recording and feedback.
+A Web Application for practicing interview questions through audio recording and feedback.
 
 ## Features
 

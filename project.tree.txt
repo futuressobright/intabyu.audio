@@ -1,0 +1,54 @@
+.
+├── README.md
+├── docs
+│   ├── ARCHITECTURE.md
+│   └── CONTRIBUTING.md
+├── eslint.config.js
+├── index.html
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── project.tree.txt
+├── public
+│   └── vite.svg
+├── server
+│   ├── db.js
+│   ├── nohup.out
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── server.js
+│   ├── tests
+│   │   ├── api.test.js
+│   │   └── test-server.js
+│   └── ttest_output.txt
+├── src
+│   ├── App.css
+│   ├── App.jsx
+│   ├── assets
+│   │   └── react.svg
+│   ├── components
+│   │   ├── AudioRecorder
+│   │   │   ├── AudioRecorder.jsx
+│   │   │   └── index.js
+│   │   ├── CategoryCard
+│   │   │   ├── CategoryCard.jsx
+│   │   │   └── index.js
+│   │   ├── CategoryList
+│   │   │   ├── CategoryList.jsx
+│   │   │   └── index.js
+│   │   ├── QuestionManager.jsx
+│   │   └── practice
+│   │       └── Practice.jsx
+│   ├── index.css
+│   ├── main.jsx
+│   ├── services
+│   │   ├── audioRecorder.js
+│   │   ├── audioStorageService.js
+│   │   ├── dbService.js
+│   │   └── storageService.js
+│   └── utils
+├── tailwind.config.js
+├── test.html
+└── vite.config.js
+
+14 directories, 38 files

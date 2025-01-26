@@ -1,0 +1,25 @@
+
+> server@1.0.0 test
+> jest tests/
+
+PASS tests/api.test.js
+  Categories API
+    ✓ POST /api/categories (21 ms)
+    ✓ GET /api/categories (3 ms)
+    ✓ PUT /api/categories/:id (2 ms)
+    ✓ DELETE /api/categories/:id (2 ms)
+  Questions API
+    ✓ POST /api/questions (3 ms)
+    ✓ GET /api/questions (2 ms)
+    ✓ PUT /api/questions/:id (3 ms)
+    ✓ DELETE /api/questions/:id (2 ms)
+  Recordings API
+    ✓ POST /api/recordings (4 ms)
+    ✓ GET /api/recordings (2 ms)
+    ✓ DELETE /api/recordings/:id (2 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       11 passed, 11 total
+Snapshots:   0 total
+Time:        0.537 s, estimated 1 s
+Ran all test suites matching /tests\//i.

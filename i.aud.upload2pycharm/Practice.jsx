@@ -119,47 +119,69 @@ const Practice = () => {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    const loadCategories = async () => {
-      const savedCategories = await dbService.getCategories();
-      setCategories(savedCategories || []);
-    };
-    loadCategories();
+    fetchCategories();
   }, []);
 
-    useEffect(() => {
-      if (activeCategory) {
-        const updatedCategory = categories.find(c => c.id === activeCategory.id);
-        setActiveCategory(updatedCategory);
-      }
-    }, [categories]);
+  useEffect(() => {
+    if (activeCategory) {
+      const updatedCategory = categories.find(c => c.id === activeCategory.id);
+      setActiveCategory(updatedCategory);
+    }
+  }, [categories]);
 
-  const addCategory = async () => {
-    const name = prompt("Enter category name:");
-    if (!name?.trim()) return;
 
-    const newCategory = {
-      id: Date.now(),
-      name,
-      questions: []
-    };
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('http://localhost:3002/api/categories?userId=6 ');
+      const data = await response.json();
+      setCategories(data);
+    } catch (err) {
+      console.error('API error:', err);
+    }
+  };
+
+const addCategory = async () => {
+  const name = prompt("Enter category name:");
+  if (!name?.trim()) return;
+
+  console.log('Sending category:', { name, userId: 6 });
+  try {
+    const response = await fetch('http://localhost:3002/api/categories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, userId: 6 })
+    });
+    console.log('Response:', response);
+    const newCategory = await response.json();
+    console.log('New category:', newCategory);
     setCategories([...categories, newCategory]);
+  } catch (err) {
+    console.error('API error:', err);
+  }
+};
+
+  const addQuestion = async (categoryId, text) => {
+    try {
+      const response = await fetch('http://localhost:3002/api/questions', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({categoryId, text})
+      });
+      const newQuestion = await response.json();
+      setCategories(categories.map(category => {
+        if (category.id === categoryId) {
+          return {
+            ...category,
+            questions: [...(category.questions || []), newQuestion]
+          };
+        }
+        return category;
+      }));
+    } catch (err) {
+      console.error('API error:', err);
+    }
   };
 
-  const addQuestion = (categoryId, text) => {
-    setCategories(categories.map(category => {
-      if (category.id === categoryId) {
-        return {
-          ...category,
-          questions: [...(category.questions || []), {
-            id: Date.now(),
-            text,
-            recordings: []
-          }]
-        };
-      }
-      return category;
-    }));
-  };
 
   return (
     <div className="bg-orange-100">  {/* Remove min-h-screen */}
