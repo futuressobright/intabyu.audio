@@ -24,10 +24,15 @@ cd intabyu.audio
 npm install
 ```
 
-3. Start the development server:
+3. START the React (client) application
 ```bash
-npm run dev
+% cd intabyu.audio [ % cdaud ]
+% npm run dev
 ```
+
+3. Start the Express server
+% cd intabyu.audio/server
+% nodemon server.js   # Runs on port 3002
 
 ## Project Structure
 
