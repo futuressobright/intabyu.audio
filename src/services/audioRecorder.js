@@ -22,7 +22,7 @@ export class AudioRecorderService {
     }
 
     this.audioChunks = [];
-    
+
     this.mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         this.audioChunks.push(event.data);
@@ -43,9 +43,9 @@ export class AudioRecorderService {
       }
 
       this.mediaRecorder.onstop = () => {
+        // Return the blob directly instead of creating a URL
         const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        resolve(audioUrl);
+        resolve(audioBlob);
       };
 
       this.mediaRecorder.stop();

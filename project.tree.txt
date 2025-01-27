@@ -1,5 +1,6 @@
 .
 ├── README.md
+├── config.js
 ├── docs
 │   ├── ARCHITECTURE.md
 │   └── CONTRIBUTING.md
@@ -12,11 +13,17 @@
 ├── public
 │   └── vite.svg
 ├── server
+│   ├── audio-uploads
+│   │   └── recording-0194a67b-3729-768b-9330-e3a3922fe1b6.webm
+│   ├── cleanup.js
 │   ├── db.js
 │   ├── nohup.out
 │   ├── package-lock.json
 │   ├── package.json
+│   ├── schema.sql
 │   ├── server.js
+│   ├── services
+│   │   └── audioStorageService.js
 │   ├── tests
 │   │   ├── api.test.js
 │   │   └── test-server.js
@@ -36,19 +43,16 @@
 │   │   ├── CategoryList
 │   │   │   ├── CategoryList.jsx
 │   │   │   └── index.js
-│   │   ├── QuestionManager.jsx
+│   │   ├── QuestionManager.jsx.TODELETE
 │   │   └── practice
 │   │       └── Practice.jsx
 │   ├── index.css
 │   ├── main.jsx
 │   ├── services
-│   │   ├── audioRecorder.js
-│   │   ├── audioStorageService.js
-│   │   ├── dbService.js
-│   │   └── storageService.js
+│   │   └── audioRecorder.js
 │   └── utils
 ├── tailwind.config.js
 ├── test.html
 └── vite.config.js
 
-14 directories, 38 files
+16 directories, 40 files

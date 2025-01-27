@@ -1,5 +1,4 @@
 import React from 'react'
-import QuestionManager from './components/QuestionManager'
 import './index.css'
 
 import Practice from './components/practice/Practice';

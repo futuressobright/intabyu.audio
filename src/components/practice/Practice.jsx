@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Flame, Star, Sparkles } from 'lucide-react';
 import AudioRecorder from '../AudioRecorder/AudioRecorder';
-import dbService from '../../services/dbService';
 
-const API_BASE_URL = 'http://localhost:3002';
-const USER_ID = '6'; // TODO: Replace with actual user authentication
+// Consolidate config directly in component for MVP
+const API_CONFIG = {
+  BASE_URL: 'http://localhost:3002',
+  ENDPOINTS: {
+    CATEGORIES: '/api/categories',
+    QUESTIONS: '/api/questions',
+    RECORDINGS: '/api/recordings'
+  }
+};
+
+const USER_CONFIG = {
+  DEFAULT_USER_ID: '6'  // TODO: Replace with actual auth
+};
 
 // UI Components
 const AchievementBanner = () => (
@@ -63,18 +73,51 @@ const ErrorMessage = ({ message, onRetry }) => (
   </div>
 );
 
-const CategoryList = ({ categories, activeCategory, onCategorySelect, onAddCategory, isLoading, error }) => {
+const CategoryList = ({
+  categories,
+  activeCategory,
+  onCategorySelect,
+  onAddCategory,
+  onAddQuestion,
+  isLoading,
+  error
+}) => {
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newQuestionText, setNewQuestionText] = useState('');
+
+  const handleAddCategory = () => {
+    if (!newCategoryName.trim()) return;
+    onAddCategory(newCategoryName);
+    setNewCategoryName('');
+  };
+
+  const handleAddQuestion = (categoryId) => {
+    if (!newQuestionText.trim()) return;
+    onAddQuestion(categoryId, newQuestionText);
+    setNewQuestionText('');
+  };
+
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
   return (
     <div className="w-1/4 min-w-[250px] bg-orange-50 overflow-y-auto p-4 border-r">
-      <button
-        onClick={onAddCategory}
-        className="w-full mb-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-      >
-        Add Category
-      </button>
+      <div className="mb-4">
+        <input
+          type="text"
+          value={newCategoryName}
+          onChange={(e) => setNewCategoryName(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
+          placeholder="New Category Name"
+          className="w-full p-2 mb-2 border rounded"
+        />
+        <button
+          onClick={handleAddCategory}
+          className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+        >
+          Add Category
+        </button>
+      </div>
 
       <div className="space-y-1">
         {categories.map(category => (
@@ -96,7 +139,22 @@ const CategoryList = ({ categories, activeCategory, onCategorySelect, onAddCateg
   );
 };
 
-const QuestionPanel = ({ category, onAddQuestion, activeQuestionId, onQuestionToggle, isLoading, error }) => {
+const QuestionPanel = ({
+  category,
+  onAddQuestion,
+  activeQuestionId,
+  onQuestionToggle,
+  isLoading,
+  error
+}) => {
+  const [newQuestion, setNewQuestion] = useState('');
+
+  const handleAddQuestion = () => {
+    if (!newQuestion.trim()) return;
+    onAddQuestion(category.id, newQuestion);
+    setNewQuestion('');
+  };
+
   if (isLoading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;
 
@@ -106,15 +164,22 @@ const QuestionPanel = ({ category, onAddQuestion, activeQuestionId, onQuestionTo
         <>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold">{category.name}</h2>
-            <button
-              onClick={() => {
-                const text = prompt("Enter your question:");
-                if (text?.trim()) onAddQuestion(category.id, text);
-              }}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-            >
-              Add Question
-            </button>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddQuestion()}
+                placeholder="New Question"
+                className="p-2 border rounded"
+              />
+              <button
+                onClick={handleAddQuestion}
+                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+              >
+                Add Question
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3">
@@ -151,61 +216,47 @@ const Practice = () => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeQuestionId, setActiveQuestionId] = useState(null);
 
-  // Local state with proper error handling
-  const [activeCategory, setActiveCategory] = useState(() => {
-    try {
-      const saved = localStorage.getItem('activeCategory');
-      return saved && saved !== 'undefined' ? JSON.parse(saved) : null;
-    } catch (error) {
-      console.error('Error parsing activeCategory from localStorage:', error);
-      return null;
-    }
-  });
+  // Enhanced error handling and logging for debugging
+  const handleAPIError = (error, context) => {
+    console.error(`[${context}] Error:`, error);
+    const message = error.response?.data?.error || error.message || 'An unexpected error occurred';
+    setError(`${context}: ${message}`);
+    setIsLoading(false);
+  };
 
-  const [activeQuestionId, setActiveQuestionId] = useState(() => {
-    try {
-      const saved = localStorage.getItem('activeQuestionId');
-      return saved && saved !== 'undefined' ? JSON.parse(saved) : null;
-    } catch (error) {
-      console.error('Error parsing activeQuestionId from localStorage:', error);
-      return null;
-    }
-  });
-
-  // Fetch categories from server
+  // Fetch categories with enhanced error handling
   const fetchCategories = async () => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log('[Practice] Fetching categories');
 
-      // Try server first
-      const response = await fetch(`${API_BASE_URL}/api/categories?userId=${USER_ID}`);
-      if (!response.ok) throw new Error('Failed to fetch categories');
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATEGORIES}?userId=${USER_CONFIG.DEFAULT_USER_ID}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch categories: ${response.statusText}`);
+      }
+
       const data = await response.json();
+      console.log(`[Practice] Received ${data.length} categories:`, data);
 
       setCategories(data);
 
-      // Backup to IndexedDB
-      await dbService.saveCategories(data);
-
-    } catch (err) {
-      console.error('Server API error:', err);
-      setError('Failed to load categories. Loading from local storage...');
-
-      try {
-        // Fallback to IndexedDB
-        const localCategories = await dbService.getCategories();
-        if (localCategories?.length) {
-          setCategories(localCategories);
-          setError(null);
-        } else {
-          setError('No cached categories available');
+      // If we had an active category, update it with new data
+      if (activeCategory) {
+        const updatedActiveCategory = data.find(c => c.id === activeCategory.id);
+        if (updatedActiveCategory) {
+          setActiveCategory(updatedActiveCategory);
         }
-      } catch (dbError) {
-        console.error('IndexedDB error:', dbError);
-        setError('Failed to load categories from both server and local storage');
       }
+
+    } catch (error) {
+      handleAPIError(error, 'Failed to fetch categories');
     } finally {
       setIsLoading(false);
     }
@@ -216,95 +267,88 @@ const Practice = () => {
     fetchCategories();
   }, []);
 
-  // Keep active category in sync with categories list
-  useEffect(() => {
-    if (activeCategory) {
-      const updatedCategory = categories.find(c => c.id === activeCategory.id);
-      setActiveCategory(updatedCategory || null);
-    }
-  }, [categories, activeCategory?.id]);
-
-  // Persist selections to localStorage
-  useEffect(() => {
-    if (activeCategory) {
-      localStorage.setItem('activeCategory', JSON.stringify(activeCategory));
-    } else {
-      localStorage.removeItem('activeCategory');
-    }
-  }, [activeCategory]);
-
-  useEffect(() => {
-    if (activeQuestionId) {
-      localStorage.setItem('activeQuestionId', JSON.stringify(activeQuestionId));
-    } else {
-      localStorage.removeItem('activeQuestionId');
-    }
-  }, [activeQuestionId]);
-
-  // Server operations with local fallback
-  const addCategory = async () => {
-    const name = prompt("Enter category name:");
-    if (!name?.trim()) return;
-
+  // Add category with enhanced error handling
+  const handleAddCategory = async (name) => {
     try {
       setError(null);
+      console.log(`[Practice] Adding new category: ${name}`);
 
-      // Try server first
-      const response = await fetch(`${API_BASE_URL}/api/categories`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CATEGORIES}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, userId: USER_ID })
+        body: JSON.stringify({
+          name,
+          userId: USER_CONFIG.DEFAULT_USER_ID
+        })
       });
 
-      if (!response.ok) throw new Error('Failed to add category');
+      if (!response.ok) {
+        throw new Error(`Failed to add category: ${response.statusText}`);
+      }
+
       const newCategory = await response.json();
+      console.log('[Practice] Category added:', newCategory);
 
+      // Update categories list and select the new category
       setCategories(prev => [...prev, newCategory]);
+      setActiveCategory(newCategory);
 
-      // Sync with IndexedDB
-      await dbService.saveCategories([...categories, newCategory]);
-
-    } catch (err) {
-      console.error('Failed to add category:', err);
-      setError('Failed to add category. Please try again.');
+    } catch (error) {
+      handleAPIError(error, 'Failed to add category');
     }
   };
 
-  const addQuestion = async (categoryId, text) => {
-    if (!text?.trim()) return;
-
+  // Add question with enhanced error handling
+  const handleAddQuestion = async (categoryId, text) => {
     try {
       setError(null);
+      console.log(`[Practice] Adding question to category ${categoryId}:`, text);
 
-      // Try server first
-      const response = await fetch(`${API_BASE_URL}/api/questions`, {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.QUESTIONS}`, {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({categoryId, text})
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ categoryId, text })
       });
 
-      if (!response.ok) throw new Error('Failed to add question');
-      const newQuestion = await response.json();
+      if (!response.ok) {
+        throw new Error(`Failed to add question: ${response.statusText}`);
+      }
 
-      const updatedCategories = categories.map(category => {
+      const newQuestion = await response.json();
+      console.log('[Practice] Question added:', newQuestion);
+
+      // Update categories and active category
+      setCategories(prev => prev.map(category => {
         if (category.id === categoryId) {
-          return {
+          const updatedCategory = {
             ...category,
             questions: [...(category.questions || []), newQuestion]
           };
+          // If this is the active category, update it too
+          if (activeCategory?.id === category.id) {
+            setActiveCategory(updatedCategory);
+          }
+          return updatedCategory;
         }
         return category;
-      });
+      }));
 
-      setCategories(updatedCategories);
-
-      // Sync with IndexedDB
-      await dbService.saveCategories(updatedCategories);
-
-    } catch (err) {
-      console.error('Failed to add question:', err);
-      setError('Failed to add question. Please try again.');
+    } catch (error) {
+      handleAPIError(error, 'Failed to add question');
     }
+  };
+
+  // Handle category selection
+  const handleCategorySelect = (category) => {
+    console.log('[Practice] Selected category:', category);
+    setActiveCategory(category);
+    setActiveQuestionId(null); // Reset active question when changing categories
+  };
+
+  // Handle question selection
+  const handleQuestionToggle = (questionId) => {
+    console.log('[Practice] Toggled question:', questionId);
+    setActiveQuestionId(activeQuestionId === questionId ? null : questionId);
   };
 
   return (
@@ -318,20 +362,27 @@ const Practice = () => {
         <CategoryList
           categories={categories}
           activeCategory={activeCategory}
-          onCategorySelect={setActiveCategory}
-          onAddCategory={addCategory}
+          onCategorySelect={handleCategorySelect}
+          onAddCategory={handleAddCategory}
+          onAddQuestion={handleAddQuestion}
           isLoading={isLoading}
           error={error}
         />
         <QuestionPanel
           category={activeCategory}
-          onAddQuestion={addQuestion}
+          onAddQuestion={handleAddQuestion}
           activeQuestionId={activeQuestionId}
-          onQuestionToggle={(qId) => setActiveQuestionId(activeQuestionId === qId ? null : qId)}
+          onQuestionToggle={handleQuestionToggle}
           isLoading={isLoading}
           error={error}
         />
       </div>
+
+      {error && (
+        <div className="p-4 bg-red-50 text-red-600 mt-4 rounded">
+          {error}
+        </div>
+      )}
     </div>
   );
 };
