@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Flame, Star, Sparkles } from 'lucide-react';
 import AudioRecorder from '../AudioRecorder/AudioRecorder';
+import SlidingCategoryList from '../SlidingInputs/SlidingInputs';
 
 // Consolidate config directly in component for MVP
 const API_CONFIG = {
@@ -73,71 +74,6 @@ const ErrorMessage = ({ message, onRetry }) => (
   </div>
 );
 
-const CategoryList = ({
-  categories,
-  activeCategory,
-  onCategorySelect,
-  onAddCategory,
-  onAddQuestion,
-  isLoading,
-  error
-}) => {
-  const [newCategoryName, setNewCategoryName] = useState('');
-  const [newQuestionText, setNewQuestionText] = useState('');
-
-  const handleAddCategory = () => {
-    if (!newCategoryName.trim()) return;
-    onAddCategory(newCategoryName);
-    setNewCategoryName('');
-  };
-
-  const handleAddQuestion = (categoryId) => {
-    if (!newQuestionText.trim()) return;
-    onAddQuestion(categoryId, newQuestionText);
-    setNewQuestionText('');
-  };
-
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
-
-  return (
-    <div className="w-1/4 min-w-[250px] bg-orange-50 overflow-y-auto p-4 border-r">
-      <div className="mb-4">
-        <input
-          type="text"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-          placeholder="New Category Name"
-          className="w-full p-2 mb-2 border rounded"
-        />
-        <button
-          onClick={handleAddCategory}
-          className="w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-        >
-          Add Category
-        </button>
-      </div>
-
-      <div className="space-y-1">
-        {categories.map(category => (
-          <div
-            key={category.id}
-            onClick={() => onCategorySelect(category)}
-            className={`p-3 rounded-lg cursor-pointer transition-colors ${
-              activeCategory?.id === category.id 
-                ? 'bg-blue-100 text-blue-700' 
-                : 'hover:bg-orange-100'
-            }`}
-          >
-            <h3 className="font-medium">{category.name}</h3>
-            <p className="text-sm text-gray-600">{category.questions?.length || 0} questions</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 const QuestionPanel = ({
   category,
@@ -359,14 +295,12 @@ const Practice = () => {
       </div>
 
       <div className="flex">
-        <CategoryList
+        <SlidingCategoryList
           categories={categories}
           activeCategory={activeCategory}
           onCategorySelect={handleCategorySelect}
           onAddCategory={handleAddCategory}
           onAddQuestion={handleAddQuestion}
-          isLoading={isLoading}
-          error={error}
         />
         <QuestionPanel
           category={activeCategory}
