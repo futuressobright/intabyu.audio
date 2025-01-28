@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Trophy, Flame, Star, Sparkles } from 'lucide-react';
 import AudioRecorder from '../AudioRecorder/AudioRecorder';
 import SlidingCategoryList from '../SlidingInputs/SlidingInputs';
+import QuestionPanel from '../QuestionPanel/QuestionPanel';
 
 // Consolidate config directly in component for MVP
 const API_CONFIG = {
@@ -74,79 +75,6 @@ const ErrorMessage = ({ message, onRetry }) => (
   </div>
 );
 
-
-const QuestionPanel = ({
-  category,
-  onAddQuestion,
-  activeQuestionId,
-  onQuestionToggle,
-  isLoading,
-  error
-}) => {
-  const [newQuestion, setNewQuestion] = useState('');
-
-  const handleAddQuestion = () => {
-    if (!newQuestion.trim()) return;
-    onAddQuestion(category.id, newQuestion);
-    setNewQuestion('');
-  };
-
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} />;
-
-  return (
-    <div className="flex-1 overflow-y-auto p-4 bg-orange-50">
-      {category ? (
-        <>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">{category.name}</h2>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newQuestion}
-                onChange={(e) => setNewQuestion(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddQuestion()}
-                placeholder="New Question"
-                className="p-2 border rounded"
-              />
-              <button
-                onClick={handleAddQuestion}
-                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
-              >
-                Add Question
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {category.questions?.map(q => (
-              <div key={q.id} className="border rounded-lg overflow-hidden bg-orange-50">
-                <div
-                  onClick={() => onQuestionToggle(q.id)}
-                  className="p-4 cursor-pointer hover:bg-orange-100 transition-colors"
-                >
-                  {q.text}
-                </div>
-
-                <div className={`transition-all duration-300 ease-in-out ${
-                  activeQuestionId === q.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'
-                }`}>
-                  <div className="p-4 bg-orange-100 border-t">
-                    <AudioRecorder questionId={q.id} />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <div className="h-full flex items-center justify-center text-gray-500">
-          Select a category to view questions
-        </div>
-      )}
-    </div>
-  );
-};
 
 const Practice = () => {
   const [categories, setCategories] = useState([]);
