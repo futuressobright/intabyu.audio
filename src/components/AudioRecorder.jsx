@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Mic, Square, Play, Pause, Clock } from 'lucide-react';
+import { Mic, Square, Clock } from 'lucide-react';
+import AudioPlayer from 'react-h5-audio-player';
+import 'react-h5-audio-player/lib/styles.css';  // Base styles
 import { AudioRecorderService } from '../services/audioRecorder.js';
 
 const API_BASE_URL = 'http://localhost:3002';
@@ -11,14 +13,13 @@ const AudioRecorder = ({ questionId }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState({});
 
-  // Initialize recordings when questionId changes
+  const playerRefs = {};
+
   useEffect(() => {
     loadRecordings();
   }, [questionId]);
 
-  // Timer for recording duration
   useEffect(() => {
     let interval;
     if (isRecording) {
@@ -31,7 +32,6 @@ const AudioRecorder = ({ questionId }) => {
     return () => clearInterval(interval);
   }, [isRecording]);
 
-  // Format seconds into MM:SS
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -47,7 +47,6 @@ const AudioRecorder = ({ questionId }) => {
       if (!response.ok) throw new Error('Failed to load recordings');
       const data = await response.json();
 
-      // Process recordings to ensure proper audio URLs
       const processedRecordings = data.map(recording => ({
         ...recording,
         audio_url: recording.audio_url.startsWith('http')
@@ -74,7 +73,6 @@ const AudioRecorder = ({ questionId }) => {
 
       await recorder.initialize();
       console.log('Recorder initialized:', recorder);
-
 
       setRecorderService(recorder);
       recorder.start();
@@ -123,14 +121,6 @@ const AudioRecorder = ({ questionId }) => {
     setRecorderService(null);
   };
 
-  // Handle play/pause state for recordings
-  const handlePlayToggle = (recordingId) => {
-    setIsPlaying(prev => ({
-      ...prev,
-      [recordingId]: !prev[recordingId]
-    }));
-  };
-
   if (isLoading) {
     return <div className="flex justify-center py-4">Loading recordings...</div>;
   }
@@ -143,7 +133,6 @@ const AudioRecorder = ({ questionId }) => {
         </div>
       )}
 
-      {/* Record button with animation */}
       <div className="flex items-center gap-3">
         {!isRecording ? (
           <button
@@ -172,7 +161,6 @@ const AudioRecorder = ({ questionId }) => {
         )}
       </div>
 
-      {/* Recordings list with enhanced UI */}
       {recordings.length > 0 && (
         <div className="space-y-3 mt-2">
           {recordings.map((recording) => (
@@ -181,35 +169,40 @@ const AudioRecorder = ({ questionId }) => {
               className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200
                        hover:border-purple-200 transition-all duration-300"
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="w-4 h-4" />
-                  <span>
-                    {new Date(recording.created_at || recording.timestamp).toLocaleString()}
-                  </span>
-                </div>
-                <button
-                  onClick={() => handlePlayToggle(recording.id)}
-                  className="p-2 hover:bg-purple-100 rounded-full transition-colors"
-                >
-                  {isPlaying[recording.id] ? (
-                    <Pause className="w-4 h-4 text-purple-600" />
-                  ) : (
-                    <Play className="w-4 h-4 text-purple-600" />
-                  )}
-                </button>
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Clock className="w-4 h-4" />
+                <span>
+                  {new Date(recording.created_at || recording.timestamp).toLocaleString()}
+                </span>
               </div>
 
-              <audio
+              <AudioPlayer
+                ref={instance => { playerRefs[recording.id] = instance }}
                 src={recording.audio_url}
-                controls
-                className="w-full"
-                onPlay={() => handlePlayToggle(recording.id)}
-                onPause={() => handlePlayToggle(recording.id)}
-                onError={(e) => {
-                  console.error('Audio playback error:', e);
-                  e.target.closest('.flex').classList.add('border-red-500');
+                onPlay={() => {
+                  // Pause all other players
+                  Object.entries(playerRefs).forEach(([id, player]) => {
+                    if (id !== recording.id.toString() && player) {
+                      player.pause();
+                      player.audio.current.currentTime = 0;
+                    }
+                  });
                 }}
+                className="rounded-lg overflow-hidden"
+                customStyles={{
+                  container: {
+                    backgroundColor: 'transparent',
+                    boxShadow: 'none'
+                  },
+                  progressBar: {
+                    backgroundColor: '#8B5CF6'
+                  },
+                  volumeBar: {
+                    backgroundColor: '#8B5CF6'
+                  }
+                }}
+                showJumpControls={false}
+                layout="horizontal"
               />
             </div>
           ))}
