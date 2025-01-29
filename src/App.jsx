@@ -1,7 +1,7 @@
 import React from 'react'
 import './index.css'
 
-import Practice from './components/practice/Practice';
+import Practice from './components/Practice.jsx';
 
 
 function App() {

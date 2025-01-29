@@ -14,7 +14,15 @@
 │   └── vite.svg
 ├── server
 │   ├── audio-uploads
-│   │   └── recording-0194a67b-3729-768b-9330-e3a3922fe1b6.webm
+│   │   ├── recording-0194a8ec-9c7a-7222-a0da-7384771b0be6.webm
+│   │   ├── recording-0194a8ed-1682-7026-839e-92cf46ed5106.webm
+│   │   ├── recording-0194a8ed-9063-750d-b97f-caa19831ed2b.webm
+│   │   ├── recording-0194aa83-55ff-7217-9d09-d6c95ea77af6.webm
+│   │   ├── recording-0194aa83-7c83-74b4-b600-a7a62e6d9021.webm
+│   │   ├── recording-0194aa86-f51a-76f5-b55a-cbadbb8e9e98.webm
+│   │   ├── recording-0194aab9-0966-774a-9bd5-71e79e2cb009.webm
+│   │   ├── recording-0194aabd-1b68-729f-89b2-a2cc1f96b8ce.webm
+│   │   └── recording-0194abab-a7af-7735-8bfb-585525d73584.webm
 │   ├── cleanup.js
 │   ├── db.js
 │   ├── nohup.out
@@ -37,13 +45,12 @@
 │   │   ├── AudioRecorder
 │   │   │   ├── AudioRecorder.jsx
 │   │   │   └── index.js
-│   │   ├── CategoryCard
-│   │   │   ├── CategoryCard.jsx
-│   │   │   └── index.js
-│   │   ├── CategoryList
-│   │   │   ├── CategoryList.jsx
-│   │   │   └── index.js
-│   │   ├── QuestionManager.jsx.TODELETE
+│   │   ├── CategoryPanel
+│   │   │   └── CategoryPanel.jsx
+│   │   ├── ExpandableInput
+│   │   │   └── ExpandableInput.jsx
+│   │   ├── QuestionPanel
+│   │   │   └── QuestionPanel.jsx
 │   │   └── practice
 │   │       └── Practice.jsx
 │   ├── index.css
@@ -55,4 +62,4 @@
 ├── test.html
 └── vite.config.js
 
-16 directories, 40 files
+17 directories, 46 files

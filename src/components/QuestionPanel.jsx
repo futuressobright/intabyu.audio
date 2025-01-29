@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown, Mic } from 'lucide-react';
-import { SlidingInput } from '../SlidingInputs/SlidingInputs';
-import AudioRecorder from '../AudioRecorder/AudioRecorder';
+import SlidingInput from './SlidingInput.jsx';
+import AudioRecorder from './AudioRecorder.jsx';
 
 const QuestionPanel = ({
   category,

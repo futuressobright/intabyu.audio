@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Flame, Star, Sparkles } from 'lucide-react';
-import AudioRecorder from '../AudioRecorder/AudioRecorder';
-import SlidingCategoryList from '../SlidingInputs/SlidingInputs';
-import QuestionPanel from '../QuestionPanel/QuestionPanel';
+import AudioRecorder from './AudioRecorder.jsx';
+import SlidingCategoryList from './SlidingCategoryList.jsx';
+import QuestionPanel from './QuestionPanel.jsx';
 
 // Consolidate config directly in component for MVP
 const API_CONFIG = {
