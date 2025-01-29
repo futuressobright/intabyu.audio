@@ -68,8 +68,14 @@ const AudioRecorder = ({ questionId }) => {
   const startRecording = async () => {
     try {
       setError(null);
+      console.log('About to create AudioRecorderService');
       const recorder = new AudioRecorderService();
+      console.log('Recorder created:', recorder);
+
       await recorder.initialize();
+      console.log('Recorder initialized:', recorder);
+
+
       setRecorderService(recorder);
       recorder.start();
       setIsRecording(true);
@@ -83,11 +89,9 @@ const AudioRecorder = ({ questionId }) => {
     if (!recorderService) return;
 
     try {
-      const audioUrl = await recorderService.stop();
       setIsRecording(false);
-
-      const response = await fetch(audioUrl);
-      const blob = await response.blob();
+      
+      const blob = await recorderService.stop();
 
       const reader = new FileReader();
       reader.readAsDataURL(blob);
