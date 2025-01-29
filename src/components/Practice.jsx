@@ -95,6 +95,29 @@ const Practice = () => {
   setCategories(newOrder);
 };
 
+  // In Practice.jsx, add this handler function
+
+  const handleQuestionReorder = (categoryId, reorderedQuestions) => {
+    console.log('[Practice] Reordering questions for category:', categoryId);
+
+    // Update categories state with reordered questions
+    setCategories(prevCategories =>
+      prevCategories.map(category => {
+        if (category.id === categoryId) {
+          return { ...category, questions: reorderedQuestions };
+        }
+        return category;
+      })
+    );
+
+    // If this is the active category, update it too
+    if (activeCategory?.id === categoryId) {
+      setActiveCategory(prev => ({ ...prev, questions: reorderedQuestions }));
+    }
+
+    // TODO: Add API call to persist question order
+    // Similar to category reordering, we can add backend persistence later
+  };
 
   // Fetch categories with enhanced error handling
   const fetchCategories = async () => {
@@ -241,6 +264,7 @@ const Practice = () => {
           onAddQuestion={handleAddQuestion}
           activeQuestionId={activeQuestionId}
           onQuestionToggle={handleQuestionToggle}
+          onReorderQuestions={handleQuestionReorder}  // Add this line
           isLoading={isLoading}
           error={error}
         />
