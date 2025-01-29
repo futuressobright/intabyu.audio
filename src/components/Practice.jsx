@@ -91,6 +91,11 @@ const Practice = () => {
     setIsLoading(false);
   };
 
+  const handleCategoryReorder = (newOrder) => {
+  setCategories(newOrder);
+};
+
+
   // Fetch categories with enhanced error handling
   const fetchCategories = async () => {
     try {
@@ -228,6 +233,7 @@ const Practice = () => {
           activeCategory={activeCategory}
           onCategorySelect={handleCategorySelect}
           onAddCategory={handleAddCategory}
+          onReorder={handleCategoryReorder}
           onAddQuestion={handleAddQuestion}
         />
         <QuestionPanel
@@ -248,5 +254,8 @@ const Practice = () => {
     </div>
   );
 };
+
+// In Practice.jsx, add this function:
+
 
 export default Practice;

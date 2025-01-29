@@ -90,7 +90,7 @@ const AudioRecorder = ({ questionId }) => {
 
     try {
       setIsRecording(false);
-      
+
       const blob = await recorderService.stop();
 
       const reader = new FileReader();
