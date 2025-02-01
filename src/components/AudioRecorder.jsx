@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mic, Square, Clock } from 'lucide-react';
 import AudioPlayer from 'react-h5-audio-player';
-import 'react-h5-audio-player/lib/styles.css';  // Base styles
+import 'react-h5-audio-player/lib/styles.css';
 import { AudioRecorderService } from '../services/audioRecorder.js';
 
 const API_BASE_URL = 'http://localhost:3002';
@@ -13,30 +13,8 @@ const AudioRecorder = ({ questionId }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-
-  const playerRefs = {};
-
-  useEffect(() => {
-    loadRecordings();
-  }, [questionId]);
-
-  useEffect(() => {
-    let interval;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setRecordingTime(prev => prev + 1);
-      }, 1000);
-    } else {
-      setRecordingTime(0);
-    }
-    return () => clearInterval(interval);
-  }, [isRecording]);
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  const [currentPlayingId, setCurrentPlayingId] = useState(null);
+  const playerRefs = useRef({});
 
   const loadRecordings = async () => {
     if (!questionId) return;
@@ -62,6 +40,28 @@ const AudioRecorder = ({ questionId }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  useEffect(() => {
+    loadRecordings();
+  }, [questionId]);
+
+  useEffect(() => {
+    let interval;
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      setRecordingTime(0);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const startRecording = async () => {
@@ -177,16 +177,17 @@ const AudioRecorder = ({ questionId }) => {
               </div>
 
               <AudioPlayer
-                ref={instance => { playerRefs[recording.id] = instance }}
+                ref={instance => { playerRefs.current[recording.id] = instance }}
                 src={recording.audio_url}
                 onPlay={() => {
-                  // Pause all other players
-                  Object.entries(playerRefs).forEach(([id, player]) => {
-                    if (id !== recording.id.toString() && player) {
-                      player.pause();
-                      player.audio.current.currentTime = 0;
+                  if (currentPlayingId && currentPlayingId !== recording.id) {
+                    const previousPlayer = playerRefs.current[currentPlayingId];
+                    if (previousPlayer && previousPlayer.audio.current) {
+                      previousPlayer.audio.current.pause();
+                      previousPlayer.audio.current.currentTime = 0;
                     }
-                  });
+                  }
+                  setCurrentPlayingId(recording.id);
                 }}
                 className="rounded-lg overflow-hidden"
                 customStyles={{
