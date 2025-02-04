@@ -46,11 +46,7 @@ const SlidingInput = ({ onSubmit, placeholder, buttonText }) => {
       <Button type="submit" disabled={!value.trim()}>
         Add
       </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        onClick={() => setIsEditing(false)}
-      >
+      <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
         Cancel
       </Button>
     </form>
@@ -129,7 +125,7 @@ const QuestionPanel = ({
         <CardContent className="p-4">
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="questions">
-              {(provided, snapshot) => (
+              {(provided) => (
                 <div
                   {...provided.droppableProps}
                   ref={provided.innerRef}
@@ -152,26 +148,27 @@ const QuestionPanel = ({
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             className={`
-                              rounded-lg border border-input
+                              rounded-lg border border-slate-200
                               transition-all duration-200
                               ${activeQuestionId === question.id 
-                                ? 'bg-primary text-primary-foreground shadow-lg scale-[1.02]' 
-                                : 'bg-background hover:bg-accent'}
-                              ${snapshot.isDragging ? 'rotate-2 scale-105 shadow-xl' : ''}
+                                ? 'bg-purple-100 shadow-md border-purple-300' 
+                                : 'bg-white hover:bg-red-200 hover:shadow-sm hover:-translate-y-[2px]'}
+                              ${snapshot.isDragging ? 'rotate-2 scale-105 shadow-lg border-purple-100' : ''}
                             `}
                             style={provided.draggableProps.style}
                           >
                             <div className="p-4">
                               <div className="flex items-center gap-3">
                                 <ChevronDown
-                                  className={`h-5 w-5 transition-transform duration-200
-                                    ${activeQuestionId === question.id ? 'rotate-180' : ''}`}
+                                  className={`h-5 w-5 transition-transform duration-200 cursor-pointer
+                                    ${activeQuestionId === question.id ? 'rotate-180 text-purple-500' : 'text-slate-400'}`}
                                   onClick={() => onQuestionToggle(question.id)}
                                 />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between gap-4">
                                     <h3
-                                      className="font-medium truncate cursor-pointer"
+                                      className={`font-medium truncate cursor-pointer
+                                        ${activeQuestionId === question.id ? 'text-purple-700' : 'text-slate-700'}`}
                                       onClick={() => onQuestionToggle(question.id)}
                                     >
                                       {question.text}
