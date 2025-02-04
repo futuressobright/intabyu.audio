@@ -90,9 +90,9 @@ const QuestionPanel = ({
         rounded-lg border border-slate-200
         transition-all duration-200
         ${activeQuestionId === question.id 
-          ? 'bg-purple-100 shadow-md border-purple-300' 
-          : 'bg-white hover:bg-slate-100 hover:shadow-sm hover:-translate-y-[2px]'}
-        ${snapshot?.isDragging ? 'rotate-2 scale-105 shadow-lg border-purple-100' : ''}
+          ? 'bg-teal-100 shadow-md border-teal-300' 
+          : 'bg-white hover:bg-teal-50 hover:shadow-sm hover:-translate-y-[2px]'}
+        ${snapshot?.isDragging ? 'rotate-2 scale-105 shadow-lg border-teal-100' : ''}
       `}
       style={provided?.draggableProps.style}
     >
@@ -100,14 +100,14 @@ const QuestionPanel = ({
         <div className="flex items-center gap-3">
           <ChevronDown
             className={`h-5 w-5 transition-transform duration-200 cursor-pointer
-              ${activeQuestionId === question.id ? 'rotate-180 text-purple-500' : 'text-slate-400'}`}
+              ${activeQuestionId === question.id ? 'rotate-180 text-teal-500' : 'text-slate-400'}`}
             onClick={() => onQuestionToggle(question.id)}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-4">
               <h3
                 className={`font-medium truncate cursor-pointer
-                  ${activeQuestionId === question.id ? 'text-purple-700' : 'text-slate-700'}`}
+                  ${activeQuestionId === question.id ? 'text-teal-700' : 'text-slate-700'}`}
                 onClick={() => onQuestionToggle(question.id)}
               >
                 {question.text}
