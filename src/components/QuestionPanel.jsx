@@ -17,24 +17,30 @@ const QuestionPanel = ({
   error
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [recentQuestions, setRecentQuestions] = useState([]);
+  const [recentQuestionsMap, setRecentQuestionsMap] = useState({});
 
-  // Track recent questions
+  // Track recent questions per category
   useEffect(() => {
-    if (activeQuestionId && category?.questions) {
+    if (activeQuestionId && category?.questions && category?.id) {
       const activeQuestion = category.questions.find(q => q.id === activeQuestionId);
       if (activeQuestion) {
-        setRecentQuestions(prev => {
-          const filtered = prev.filter(q => q.id !== activeQuestionId);
-          return [activeQuestion, ...filtered].slice(0, 4);
+        setRecentQuestionsMap(prev => {
+          const categoryRecentQuestions = prev[category.id] || [];
+          const filtered = categoryRecentQuestions.filter(q => q.id !== activeQuestionId);
+          return {
+            ...prev,
+            [category.id]: [activeQuestion, ...filtered].slice(0, 4)
+          };
         });
       }
     }
-  }, [activeQuestionId, category?.questions]);
+  }, [activeQuestionId, category?.questions, category?.id]);
+
+  const currentRecentQuestions = category ? (recentQuestionsMap[category.id] || []) : [];
 
   // Filter out recent questions from main list
   const mainQuestions = (category?.questions || []).filter(
-    question => !recentQuestions.find(rq => rq.id === question.id)
+    question => !currentRecentQuestions.find(rq => rq.id === question.id)
   );
 
   const handleDragEnd = (result) => {
@@ -199,11 +205,11 @@ const QuestionPanel = ({
       <ScrollArea className="h-[calc(100vh-16rem)]">
         <CardContent className="p-4">
           {/* Recent Questions Section */}
-          {recentQuestions.length > 0 && (
+          {currentRecentQuestions.length > 0 && (
             <div className="mb-6">
               <div className="text-sm font-medium text-muted-foreground mb-3">Recent Questions</div>
               <div className="space-y-3">
-                {recentQuestions.map((question) => (
+                {currentRecentQuestions.map((question) => (
                   <QuestionCard key={question.id} question={question} />
                 ))}
               </div>

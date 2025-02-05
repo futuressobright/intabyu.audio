@@ -164,48 +164,69 @@ const AudioRecorder = ({ questionId }) => {
       {recordings.length > 0 && (
         <div className="space-y-3 mt-2">
           {recordings.map((recording) => (
-            <div
-              key={recording.id}
-              className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200
-                       hover:border-purple-200 transition-all duration-300"
-            >
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Clock className="w-4 h-4" />
-                <span>
-                  {new Date(recording.created_at || recording.timestamp).toLocaleString()}
-                </span>
-              </div>
+              <div
+                  key={recording.id}
+                  className="flex items-center gap-4 p-3 rounded-lg border border-transparent
+            hover:border-purple-100 hover:bg-purple-50/30 transition-all duration-200"
+              >
 
-              <AudioPlayer
-                ref={instance => { playerRefs.current[recording.id] = instance }}
-                src={recording.audio_url}
-                onPlay={() => {
-                  if (currentPlayingId && currentPlayingId !== recording.id) {
-                    const previousPlayer = playerRefs.current[currentPlayingId];
-                    if (previousPlayer && previousPlayer.audio.current) {
-                      previousPlayer.audio.current.pause();
-                      previousPlayer.audio.current.currentTime = 0;
-                    }
-                  }
-                  setCurrentPlayingId(recording.id);
-                }}
-                className="rounded-lg overflow-hidden"
-                customStyles={{
-                  container: {
-                    backgroundColor: 'transparent',
-                    boxShadow: 'none'
-                  },
-                  progressBar: {
-                    backgroundColor: '#8B5CF6'
-                  },
-                  volumeBar: {
-                    backgroundColor: '#8B5CF6'
-                  }
-                }}
-                showJumpControls={false}
-                layout="horizontal"
-              />
-            </div>
+
+
+
+
+
+      <AudioPlayer
+          ref={instance => {
+            playerRefs.current[recording.id] = instance
+          }}
+          src={recording.audio_url}
+          onPlay={() => {
+            if (currentPlayingId && currentPlayingId !== recording.id) {
+              const previousPlayer = playerRefs.current[currentPlayingId];
+              if (previousPlayer && previousPlayer.audio.current) {
+                previousPlayer.audio.current.pause();
+                previousPlayer.audio.current.currentTime = 0;
+              }
+            }
+            setCurrentPlayingId(recording.id);
+          }}
+          className="rounded-lg overflow-hidden flex-1"
+          customStyles={{
+            container: {
+              backgroundColor: 'transparent',
+              boxShadow: 'none'
+            },
+            progressBar: {
+              backgroundColor: '#8B5CF6'
+            },
+            volumeBar: {
+              backgroundColor: '#8B5CF6'
+            }
+          }}
+          showJumpControls={false}
+          layout="horizontal"
+      />
+
+      <div className="flex items-center gap-2 text-muted-foreground shrink-0">
+        <Clock className="w-3 h-3" />
+        <span className="text-xs">
+          {new Date(recording.created_at || recording.timestamp).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            hour12: true
+          })}
+        </span>
+      </div>
+
+
+
+
+
+
+
+              </div>
           ))}
         </div>
       )}
