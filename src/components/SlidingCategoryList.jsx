@@ -119,15 +119,15 @@ const SlidingCategoryList = ({
               group relative overflow-hidden mb-2
               rounded-lg border transition-all duration-200
               ${activeCategory?.id === category.id 
-                ? 'bg-teal-100 shadow-md border-teal-300' 
-                : 'bg-white hover:bg-teal-50 hover:shadow-sm hover:-translate-y-[2px]'}
+                ? 'bg-blue-100 shadow-md border-blue-300' 
+                : 'bg-white hover:bg-blue-50 hover:shadow-sm hover:-translate-y-[2px]'}
             `}
           >
             <div className="p-3">
               <div className="flex items-center gap-2">
                 <ChevronRight
                   className={`h-4 w-4 transition-transform duration-200
-                    ${activeCategory?.id === category.id ? 'rotate-90 text-teal-500' : ''}`}
+                    ${activeCategory?.id === category.id ? 'rotate-90 text-blue-500' : ''}`}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="font-medium truncate">{category.name}</div>
@@ -174,8 +174,8 @@ const SlidingCategoryList = ({
                             group relative overflow-hidden
                             rounded-lg border transition-all duration-200
                             ${activeCategory?.id === category.id 
-                              ? 'bg-teal-100 shadow-md border-teal-300' 
-                              : 'bg-white hover:bg-teal-50 hover:shadow-sm hover:-translate-y-[2px]'}
+                              ? 'bg-blue-100 shadow-md border-blue-300' 
+                              : 'bg-white hover:bg-blue-50 hover:shadow-sm hover:-translate-y-[2px]'}
                             ${snapshot.isDragging ? 'rotate-2 scale-105 shadow-xl' : ''}
                           `}
                           style={provided.draggableProps.style}
@@ -184,7 +184,7 @@ const SlidingCategoryList = ({
                             <div className="flex items-center gap-2">
                               <ChevronRight
                                 className={`h-4 w-4 transition-transform duration-200
-                                  ${activeCategory?.id === category.id ? 'rotate-90 text-teal-500' : ''}`}
+                                  ${activeCategory?.id === category.id ? 'rotate-90 text-blue-500' : ''}`}
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium truncate">{category.name}</div>

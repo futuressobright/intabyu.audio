@@ -96,8 +96,8 @@ const QuestionPanel = ({
         rounded-lg border border-slate-200
         transition-all duration-200
         ${activeQuestionId === question.id 
-          ? 'bg-teal-100 shadow-md border-teal-300' 
-          : 'bg-white hover:bg-teal-50 hover:shadow-sm hover:-translate-y-[2px]'}
+          ? 'bg-blue-200 shadow-md border-blue-300' 
+          : 'bg-white hover:bg-blue-50 hover:shadow-sm hover:-translate-y-[2px]'}
         ${snapshot?.isDragging ? 'rotate-2 scale-105 shadow-lg border-teal-100' : ''}
       `}
       style={provided?.draggableProps.style}
