@@ -28,8 +28,19 @@ const RecordingCard = ({
         audioRef.current = audio;
         audioRefs.current[recording.id] = audio;
 
+        // Use stored duration from database
+        if (recording.duration) {
+            setDuration(recording.duration);
+        }
+
+        console.log('Recording data:', {
+          id: recording.id,
+          storedDuration: recording.duration,
+          audioDuration: duration
+        });
+
         const handleLoadedMetadata = () => {
-            if (audio.readyState >= 2 && !isNaN(audio.duration) && audio.duration > 0) {
+            if (!recording.duration && audio.readyState >= 2 && !isNaN(audio.duration) && audio.duration > 0) {
                 setDuration(audio.duration);
                 onLoadedMetadata(recording.id, audio.duration);
             }
