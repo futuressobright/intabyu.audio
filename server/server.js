@@ -161,7 +161,20 @@ app.get('/api/recordings', async (req, res) => {
   }
 });
 
-
+app.delete('/api/recordings/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await db.query('SELECT audio_url FROM recordings WHERE id = $1', [id]);
+    if (result.rows.length > 0) {
+      const filepath = path.join(AUDIO_UPLOADS_DIR, path.basename(result.rows[0].audio_url));
+      await fs.unlink(filepath);
+      await db.query('DELETE FROM recordings WHERE id = $1', [id]);
+    }
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post('/api/recordings', async (req, res) => {
   try {

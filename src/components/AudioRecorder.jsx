@@ -2,20 +2,22 @@ import React, {useState, useEffect, useRef} from 'react';
 import {Mic, Square, Clock, Play, Pause, ChevronLeft, ChevronRight, ChevronDown, ChevronUp} from 'lucide-react';
 import {Button} from '@/components/ui/button';
 import {AudioRecorderService} from '../services/audioRecorder.js';
+import {Trash2} from 'lucide-react';
 
 const API_BASE_URL = 'http://localhost:3002';
 
 const RecordingCard = ({
-    recording,
-    index,
-    isActive,
-    isListView,
-    handlePlayPause,
-    currentPlayingId,
-    audioRefs,
-    activeRecordingIndex,
-    onLoadedMetadata
-}) => {
+                           recording,
+                           index,
+                           isActive,
+                           isListView,
+                           handlePlayPause,
+                           currentPlayingId,
+                           audioRefs,
+                           activeRecordingIndex,
+                           onLoadedMetadata,
+                           onDelete
+                       }) => {
     const audioRef = useRef(null);
     const progressBarRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -34,9 +36,9 @@ const RecordingCard = ({
         }
 
         console.log('Recording data:', {
-          id: recording.id,
-          storedDuration: recording.duration,
-          audioDuration: duration
+            id: recording.id,
+            storedDuration: recording.duration,
+            audioDuration: duration
         });
 
         const handleLoadedMetadata = () => {
@@ -100,7 +102,6 @@ const RecordingCard = ({
     };
 
     const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
     return (
         <div
             className={`flex flex-col gap-3 p-4 rounded-lg bg-white border 
@@ -134,6 +135,8 @@ const RecordingCard = ({
                     {isPlaying ? <Pause className="h-4 w-4"/> : <Play className="h-4 w-4"/>}
                 </Button>
 
+
+
                 <div className="flex-1 group relative">
                     <div
                         ref={progressBarRef}
@@ -146,6 +149,15 @@ const RecordingCard = ({
                         />
                     </div>
                 </div>
+
+                                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => onDelete(recording.id)}
+                    className="h-8 w-8 p-0"
+                >
+                    <Trash2 className="h-4 w-4"/>
+                </Button>
 
                 <span className="text-xs text-gray-600 ml-3 tabular-nums">
                     {formatTime(currentTime)} / {formatTime(duration)}
@@ -276,6 +288,15 @@ const AudioRecorder = ({questionId}) => {
             console.error('Error stopping recording:', error);
         }
         setRecorderService(null);
+    };
+
+    const deleteRecording = async (recordingId) => {
+        try {
+            await fetch(`${API_BASE_URL}/api/recordings/${recordingId}`, {method: 'DELETE'});
+            setRecordings(prev => prev.filter(rec => rec.id !== recordingId));
+        } catch (error) {
+            console.error('Error deleting recording:', error);
+        }
     };
 
     const handlePlayPause = async (recordingId, audioElement) => {
@@ -421,6 +442,7 @@ const AudioRecorder = ({questionId}) => {
                             audioRefs={audioRefs}
                             activeRecordingIndex={activeRecordingIndex}
                             onLoadedMetadata={handleLoadedMetadata}
+                            onDelete={deleteRecording}
                         />
                     ))}
                 </div>
