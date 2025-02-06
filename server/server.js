@@ -30,7 +30,7 @@ app.use(express.json({limit: '50mb'}));
 app.use('/audio-uploads', express.static(AUDIO_UPLOADS_DIR, {
   setHeaders: (res, filepath) => {
     console.log('[Server] Serving audio file:', filepath);
-    res.set('Content-Type', 'audio/webm');
+    res.set('Content-Type', 'audio/mp4');
     res.set('Cache-Control', 'public, max-age=31536000');
     res.set('Access-Control-Allow-Origin', '*');
   }
@@ -161,9 +161,11 @@ app.get('/api/recordings', async (req, res) => {
   }
 });
 
+
+
 app.post('/api/recordings', async (req, res) => {
   try {
-    const { questionId, audioData } = req.body;
+    const { questionId, audioData, duration } = req.body;
     console.log(`[Server] Received new recording for question ${questionId}`);
     console.log('[Server] Audio data prefix:', audioData.substring(0, 50));
 
@@ -174,7 +176,7 @@ app.post('/api/recordings', async (req, res) => {
 
     // Generate UUID v7-based filename
     const uuid = uuidv7();
-    const filename = `recording-${uuid}.webm`;
+    const filename = `recording-${uuid}.m4a`;  // Using .m4a extension for AAC audio
     const filepath = path.join(AUDIO_UPLOADS_DIR, filename);
     const audioUrl = `/audio-uploads/${filename}`;
 
@@ -204,15 +206,16 @@ app.post('/api/recordings', async (req, res) => {
       modified: stats.mtime
     });
 
-    // Save to database
+    // Save to database with duration
     const result = await db.query(
-      'INSERT INTO recordings (question_id, audio_url, created_at) VALUES ($1, $2, CURRENT_TIMESTAMP) RETURNING *',
-      [questionId, audioUrl]
+      'INSERT INTO recordings (question_id, audio_url, duration, created_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP) RETURNING *',
+      [questionId, audioUrl, duration]
     );
     console.log('[Server] Recording saved to database:', {
       id: result.rows[0].id,
       questionId,
       audioUrl,
+      duration,
       timestamp: result.rows[0].created_at
     });
 
@@ -225,6 +228,11 @@ app.post('/api/recordings', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
+
+
+
 
 // Start server
 const PORT = process.env.PORT || 3002;

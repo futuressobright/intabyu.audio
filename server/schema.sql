@@ -26,7 +26,8 @@ CREATE TABLE recordings (
     question_id INTEGER REFERENCES questions(id),
     audio_url TEXT,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    last_modified TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    last_modified TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    duration NUMERIC
 );
 
 -- Add indexes

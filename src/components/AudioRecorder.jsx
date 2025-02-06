@@ -6,96 +6,75 @@ import {AudioRecorderService} from '../services/audioRecorder.js';
 const API_BASE_URL = 'http://localhost:3002';
 
 const RecordingCard = ({
-                           recording,
-                           index,
-                           isActive,
-                           isListView,
-                           handlePlayPause,
-                           currentPlayingId,
-                           audioRefs,
-                           activeRecordingIndex,
-                           onLoadedMetadata
-                       }) => {
+    recording,
+    index,
+    isActive,
+    isListView,
+    handlePlayPause,
+    currentPlayingId,
+    audioRefs,
+    activeRecordingIndex,
+    onLoadedMetadata
+}) => {
     const audioRef = useRef(null);
     const progressBarRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
 
-    // Set up audio element and event listeners once
     useEffect(() => {
-        // Create audio element
         const audio = new Audio(recording.audio_url);
         audioRef.current = audio;
         audioRefs.current[recording.id] = audio;
 
-        // Debug line to verify loading
-        console.log('Setting up audio for:', recording.audio_url);
-
         const handleLoadedMetadata = () => {
-            const audioDuration = audio.duration;
-            console.log('Audio metadata loaded:', {
-                duration: audioDuration,
-                src: audio.src,
-                readyState: audio.readyState
-            });
-            setDuration(audioDuration);
+            if (audio.readyState >= 2 && !isNaN(audio.duration) && audio.duration > 0) {
+                setDuration(audio.duration);
+                onLoadedMetadata(recording.id, audio.duration);
+            }
         };
 
         const updateTime = () => {
             if (!isDragging) {
                 setCurrentTime(audio.currentTime);
-                // Force re-render of progress bar
-                progressBarRef.current?.style.setProperty('--progress', `${(audio.currentTime / audio.duration) * 100}%`);
+                if (progressBarRef.current && audio.duration > 0) {
+                    progressBarRef.current.style.setProperty('--progress', `${(audio.currentTime / audio.duration) * 100}%`);
+                }
             }
+        };
+
+        const handlePlay = () => setIsPlaying(true);
+        const handlePause = () => setIsPlaying(false);
+        const handleEnded = () => {
+            setIsPlaying(false);
+            setCurrentTime(0);
         };
 
         audio.addEventListener('loadedmetadata', handleLoadedMetadata);
         audio.addEventListener('timeupdate', updateTime);
-        audio.addEventListener('play', () => setIsPlaying(true));
-        audio.addEventListener('pause', () => setIsPlaying(false));
-        audio.addEventListener('ended', () => {
-            setIsPlaying(false);
-            setCurrentTime(0);
-        });
+        audio.addEventListener('play', handlePlay);
+        audio.addEventListener('pause', handlePause);
+        audio.addEventListener('ended', handleEnded);
 
-        // Load the audio
         audio.load();
 
         return () => {
             audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
             audio.removeEventListener('timeupdate', updateTime);
-            audio.removeEventListener('play', () => setIsPlaying(true));
-            audio.removeEventListener('pause', () => setIsPlaying(false));
-            audio.removeEventListener('ended', () => {
-                setIsPlaying(false);
-                setCurrentTime(0);
-            });
+            audio.removeEventListener('play', handlePlay);
+            audio.removeEventListener('pause', handlePause);
+            audio.removeEventListener('ended', handleEnded);
             audio.pause();
             delete audioRefs.current[recording.id];
         };
-    }, [recording.id, recording.audio_url, isDragging]);
-
-    // Update playing state when global playback changes
-    useEffect(() => {
-        const isCurrentlyPlaying = currentPlayingId === recording.id;
-        setIsPlaying(isCurrentlyPlaying);
-
-        if (!isCurrentlyPlaying && audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-        }
-    }, [currentPlayingId, recording.id]);
+    }, [recording.audio_url, recording.id, isDragging]);
 
     const handleProgressBarClick = (e) => {
         if (!audioRef.current || !progressBarRef.current) return;
-
         const rect = progressBarRef.current.getBoundingClientRect();
         const clickPosition = (e.clientX - rect.left) / rect.width;
         const newTime = clickPosition * duration;
-
         if (!isNaN(newTime) && isFinite(newTime)) {
             audioRef.current.currentTime = newTime;
             setCurrentTime(newTime);
@@ -114,15 +93,13 @@ const RecordingCard = ({
     return (
         <div
             className={`flex flex-col gap-3 p-4 rounded-lg bg-white border 
-                             transition-all duration-300 ${
-                            isActive
-                                ? 'border-blue-200 bg-blue-50/50 shadow-sm scale-100 opacity-100'
-                                : isListView
-                                    ? 'border-gray-100 hover:border-blue-100 hover:bg-blue-50/30'
-                                    : 'scale-95 opacity-0 absolute pointer-events-none'
-                        }`}
-
-            
+                transition-all duration-300 ${
+                isActive
+                    ? 'border-blue-200 bg-blue-50/50 shadow-sm scale-100 opacity-100'
+                    : isListView
+                        ? 'border-gray-100 hover:border-blue-100 hover:bg-blue-50/30'
+                        : 'scale-95 opacity-0 absolute pointer-events-none'
+            }`}
             style={{
                 transform: !isListView && !isActive ? `translateX(${index < activeRecordingIndex ? '-100%' : '100%'})` : undefined
             }}
@@ -143,11 +120,7 @@ const RecordingCard = ({
                         }
                     }}
                 >
-                    {isPlaying ? (
-                        <Pause className="h-4 w-4"/>
-                    ) : (
-                        <Play className="h-4 w-4"/>
-                    )}
+                    {isPlaying ? <Pause className="h-4 w-4"/> : <Play className="h-4 w-4"/>}
                 </Button>
 
                 <div className="flex-1 group relative">
@@ -158,22 +131,14 @@ const RecordingCard = ({
                     >
                         <div
                             className="absolute inset-y-0 left-0 bg-blue-500 transition-[width] duration-100"
-                            style={{
-                                width: `${progress}%`,
-                            }}
+                            style={{width: `${progress}%`}}
                         />
                     </div>
-                    <span className="text-xs text-gray-600 ml-3 tabular-nums">
-        {formatTime(currentTime)} / {formatTime(duration)}
-    </span>
                 </div>
 
-
-                {/* Duration display - made more prominent */}
                 <span className="text-xs text-gray-600 ml-3 tabular-nums">
-
-            {formatTime(currentTime)} / {formatTime(duration)}
-          </span>
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                </span>
             </div>
         </div>
     );
@@ -268,6 +233,7 @@ const AudioRecorder = ({questionId}) => {
         try {
             setIsRecording(false);
             const blob = await recorderService.stop();
+            const duration = recordingTime;
 
             const reader = new FileReader();
             reader.readAsDataURL(blob);
@@ -279,7 +245,8 @@ const AudioRecorder = ({questionId}) => {
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
                         questionId,
-                        audioData: base64data
+                        audioData: base64data,
+                        duration
                     })
                 });
 
@@ -302,7 +269,6 @@ const AudioRecorder = ({questionId}) => {
 
     const handlePlayPause = async (recordingId, audioElement) => {
         try {
-            // Stop other playing audio first
             if (currentPlayingId && currentPlayingId !== recordingId) {
                 const previousAudio = audioRefs.current[currentPlayingId];
                 if (previousAudio) {
@@ -311,7 +277,6 @@ const AudioRecorder = ({questionId}) => {
                 }
             }
 
-            // Now handle the clicked audio
             if (!audioElement) return;
 
             if (audioElement.paused) {
@@ -328,7 +293,6 @@ const AudioRecorder = ({questionId}) => {
     };
 
     const navigateRecordings = (direction) => {
-        // First stop any playing audio
         if (currentPlayingId) {
             const currentAudio = audioRefs.current[currentPlayingId];
             if (currentAudio) {
@@ -338,7 +302,6 @@ const AudioRecorder = ({questionId}) => {
             setCurrentPlayingId(null);
         }
 
-        // Then navigate
         const newIndex = direction === 'next'
             ? activeRecordingIndex + 1
             : activeRecordingIndex - 1;
@@ -362,11 +325,11 @@ const AudioRecorder = ({questionId}) => {
 
             <div className="flex items-center gap-3">
                 {!isRecording ? (
-                <Button
-                    onClick={startRecording}
-                    variant="outline"
-                    className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700"
-                >
+                    <Button
+                        onClick={startRecording}
+                        variant="outline"
+                        className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700"
+                    >
                         <Mic className="w-4 h-4"/>
                         <span>Record Answer</span>
                     </Button>
@@ -416,8 +379,8 @@ const AudioRecorder = ({questionId}) => {
                     </Button>
 
                     <span className="text-sm text-gray-600">
-            Recording {activeRecordingIndex + 1} of {recordings.length}
-          </span>
+                        Recording {activeRecordingIndex + 1} of {recordings.length}
+                    </span>
 
                     <Button
                         variant="ghost"
