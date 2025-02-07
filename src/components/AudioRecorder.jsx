@@ -163,6 +163,11 @@ const RecordingCard = ({
                     {formatTime(currentTime)} / {formatTime(duration)}
                 </span>
             </div>
+
+
+
+
+
         </div>
     );
 };
