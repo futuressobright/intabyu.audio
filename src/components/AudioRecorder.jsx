@@ -203,7 +203,7 @@ const AudioRecorder = ({questionId}) => {
                     onClick={startRecording}
                     variant="outline"
                     size="sm"
-                    className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700"
+    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
                 >
                     <Mic className="w-4 h-4"/>
                     <span>Record</span>
