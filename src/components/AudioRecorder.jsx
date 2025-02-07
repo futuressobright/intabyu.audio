@@ -251,9 +251,9 @@ const AudioRecorder = ({questionId}) => {
                     >
                         <ChevronLeft className="h-4 w-4"/>
                     </Button>
-                    <span className="text-sm text-gray-500">
-        {activeRecordingIndex + 1}/{recordings.length}
-    </span>
+        <span className="text-sm text-gray-500">
+    {recordings.length - activeRecordingIndex}/{recordings.length}
+</span>
                     <Button
                         variant="ghost"
                         size="sm"
@@ -275,6 +275,7 @@ const AudioRecorder = ({questionId}) => {
                             key={recording.id}
                             recording={recording}
                             index={index}
+                            length={recordings.length}
                             isActive={isListView || index === activeRecordingIndex}
                             isListView={isListView}
                             handlePlayPause={handlePlayPause}
