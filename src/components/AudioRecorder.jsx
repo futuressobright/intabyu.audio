@@ -190,106 +190,103 @@ const AudioRecorder = ({questionId}) => {
     }
 
     return (
-        <div className="flex flex-col gap-3">
-            {error && (
-                <div className="text-red-500 text-sm bg-red-50 p-2 rounded-lg">
-                    {error}
+    <div className="flex flex-col gap-3">
+        {error && (
+            <div className="text-red-500 text-sm bg-red-50 p-2 rounded-lg">
+                {error}
+            </div>
+        )}
+
+        <div className="flex items-center justify-between gap-3">
+            {!isRecording ? (
+                <Button
+                    onClick={startRecording}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700"
+                >
+                    <Mic className="w-4 h-4"/>
+                    <span>Record</span>
+                </Button>
+            ) : (
+                <div className="flex items-center gap-3">
+                    <Button
+                        onClick={stopRecording}
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-2"
+                    >
+                        <Square className="w-4 h-4"/>
+                        <span>Stop</span>
+                    </Button>
+                    <div className="flex items-center gap-2 text-gray-600">
+                        <Clock className="w-4 h-4 animate-pulse"/>
+                        <span>{formatTime(recordingTime)}</span>
+                    </div>
                 </div>
             )}
 
-            <div className="flex items-center gap-3">
-                {!isRecording ? (<Button
-                        onClick={startRecording}
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700"
-                    >
-                        <Mic className="w-4 h-4"/>
-                        <span>Record</span>
-                    </Button>
-                ) : (
-                    <div className="flex items-center gap-3">
+            {recordings.length > 0 && (
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-end gap-2 bg-white p-1 rounded-lg">
                         <Button
-                            onClick={stopRecording}
-                            variant="destructive"
-                            className="flex items-center gap-2"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigateRecordings('prev')}
+                            disabled={activeRecordingIndex === 0}
+                            className="h-7 w-7 p-0"
                         >
-                            <Square className="w-4 h-4"/>
-                            <span>Stop</span>
+                            <ChevronLeft className="h-4 w-4"/>
                         </Button>
-                        <div className="flex items-center gap-2 text-gray-600">
-                            <Clock className="w-4 h-4 animate-pulse"/>
-                            <span>{formatTime(recordingTime)}</span>
-                        </div>
+                        <span className="text-sm text-gray-500">
+                            {recordings.length - activeRecordingIndex}/{recordings.length}
+                        </span>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigateRecordings('next')}
+                            disabled={activeRecordingIndex === recordings.length - 1}
+                            className="h-7 w-7 p-0"
+                        >
+                            <ChevronRight className="h-4 w-4"/>
+                        </Button>
                     </div>
-                )}
-
-                {recordings.length > 0 && (
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsListView(!isListView)}
-                        className="ml-auto"
-                    >
-                        {isListView ? (
-                            <ChevronUp className="h-4 w-4"/>
-                        ) : (
-                            <ChevronDown className="h-4 w-4"/>
-                        )}
-                    </Button>
-                )}
-            </div>
-
-            {recordings.length > 0 && (
-                <div className="flex items-center justify-end gap-2 bg-gray-50 p-1 rounded-lg ml-auto">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigateRecordings('prev')}
-                        disabled={activeRecordingIndex === 0}
                         className="h-7 w-7 p-0"
                     >
-                        <ChevronLeft className="h-4 w-4"/>
+                        {isListView ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
                     </Button>
-        <span className="text-sm text-gray-500">
-    {recordings.length - activeRecordingIndex}/{recordings.length}
-</span>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigateRecordings('next')}
-                        disabled={activeRecordingIndex === recordings.length - 1}
-                        className="h-7 w-7 p-0"
-                    >
-                        <ChevronRight className="h-4 w-4"/>
-                    </Button>
-                </div>
-            )}
-
-            {recordings.length > 0 && (
-                <div className={`relative space-y-2 transition-all duration-300 ${
-                    isListView ? 'max-h-96 overflow-y-auto' : 'h-32'
-                }`}>
-                    {recordings.map((recording, index) => (
-                        <RecordingCard
-                            key={recording.id}
-                            recording={recording}
-                            index={index}
-                            length={recordings.length}
-                            isActive={isListView || index === activeRecordingIndex}
-                            isListView={isListView}
-                            handlePlayPause={handlePlayPause}
-                            currentPlayingId={currentPlayingId}
-                            audioRefs={audioRefs}
-                            activeRecordingIndex={activeRecordingIndex}
-                            onLoadedMetadata={handleLoadedMetadata}
-                            onDelete={deleteRecording}
-                        />
-                    ))}
                 </div>
             )}
         </div>
-    );
+
+        {recordings.length > 0 && (
+            <div className={`relative space-y-2 transition-all duration-300 ${
+                isListView ? 'max-h-96 overflow-y-auto' : 'h-32'
+            }`}>
+                {recordings.map((recording, index) => (
+                    <RecordingCard
+                        key={recording.id}
+                        recording={recording}
+                        index={index}
+                        length={recordings.length}
+                        isActive={isListView || index === activeRecordingIndex}
+                        isListView={isListView}
+                        handlePlayPause={handlePlayPause}
+                        currentPlayingId={currentPlayingId}
+                        audioRefs={audioRefs}
+                        activeRecordingIndex={activeRecordingIndex}
+                        onLoadedMetadata={handleLoadedMetadata}
+                        onDelete={deleteRecording}
+                    />
+                ))}
+            </div>
+        )}
+    </div>
+);
 };
 
 export default AudioRecorder;
