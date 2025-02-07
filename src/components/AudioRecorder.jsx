@@ -198,14 +198,14 @@ const AudioRecorder = ({questionId}) => {
             )}
 
             <div className="flex items-center gap-3">
-                {!isRecording ? (
-                    <Button
+                {!isRecording ? (<Button
                         onClick={startRecording}
                         variant="outline"
+                        size="sm"
                         className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700"
                     >
                         <Mic className="w-4 h-4"/>
-                        <span>Record Answer</span>
+                        <span>Record</span>
                     </Button>
                 ) : (
                     <div className="flex items-center gap-3">
@@ -241,27 +241,25 @@ const AudioRecorder = ({questionId}) => {
             </div>
 
             {recordings.length > 0 && (
-                <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                <div className="flex items-center justify-end gap-2 bg-gray-50 p-1 rounded-lg ml-auto">
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => navigateRecordings('prev')}
                         disabled={activeRecordingIndex === 0}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="h-7 w-7 p-0"
                     >
                         <ChevronLeft className="h-4 w-4"/>
                     </Button>
-
-                    <span className="text-sm text-gray-600">
-                        Recording {activeRecordingIndex + 1} of {recordings.length}
-                    </span>
-
+                    <span className="text-sm text-gray-500">
+        {activeRecordingIndex + 1}/{recordings.length}
+    </span>
                     <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => navigateRecordings('next')}
                         disabled={activeRecordingIndex === recordings.length - 1}
-                        className="text-gray-500 hover:text-gray-700"
+                        className="h-7 w-7 p-0"
                     >
                         <ChevronRight className="h-4 w-4"/>
                     </Button>
